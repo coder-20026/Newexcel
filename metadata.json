@@ -1,0 +1,5 @@
+{
+  "name": "Excel Clone",
+  "description": "A mobile-friendly Microsoft Excel clone with grid, formulas, and formatting.",
+  "requestFramePermissions": []
+}
