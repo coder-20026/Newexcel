@@ -2,9 +2,9 @@ name: Build Android APK
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
   # Manual trigger bhi add kiya hai
   workflow_dispatch:
 
