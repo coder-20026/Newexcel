@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       # Step 4: Android SDK setup
       - name: Setup Android SDK
@@ -87,4 +87,3 @@ jobs:
       # - name: Build Release APK
       #   working-directory: android
       #   run: ./gradlew assembleRelease
-
