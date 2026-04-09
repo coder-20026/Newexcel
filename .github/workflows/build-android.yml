@@ -1,0 +1,90 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  # Manual trigger bhi add kiya hai
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Code checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Node.js setup
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Step 3: Java setup (Android ke liye required)
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Step 4: Android SDK setup
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Step 5: Dependencies install
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 6: Capacitor dependencies install
+      - name: Install Capacitor
+        run: |
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      # Step 7: Web app build
+      - name: Build web app
+        run: npm run build
+
+      # Step 8: Capacitor initialize (agar pehle se nahi hai)
+      - name: Initialize Capacitor
+        run: |
+          if [ ! -f "capacitor.config.ts" ] && [ ! -f "capacitor.config.json" ]; then
+            npx cap init "Excel Clone" "com.excelclone.app" --web-dir=dist
+          fi
+
+      # Step 9: Android platform add
+      - name: Add Android platform
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
+
+      # Step 10: Sync web assets to Android
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      # Step 11: Make gradlew executable
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      # Step 12: Build Debug APK
+      - name: Build Debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      # Step 13: APK upload as artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: excel-clone-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      # Optional: Release APK build (signed)
+      # - name: Build Release APK
+      #   working-directory: android
+      #   run: ./gradlew assembleRelease
+
